@@ -1,0 +1,17 @@
+[
+    {
+        "nombre": "Camisa azul talla XL",
+        "precio": "300 lps",
+        "imagen": "uploads/descarga.jpg"
+    },
+    {
+        "nombre": "Hola yoli",
+        "precio": "200lps",
+        "imagen": "uploads/Screenshot_20260218_101600.jpg"
+    },
+    {
+        "nombre": "Splash",
+        "precio": "450",
+        "imagen": "uploads/1147095.jpg"
+    }
+]

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Tienda</title>
+
+<style>
+
+body{
+font-family: Arial;
+text-align:center;
+background:#f5f5f5;
+}
+
+h1{
+margin-top:30px;
+}
+
+.grid{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+.card{
+background:white;
+margin:20px;
+padding:20px;
+width:250px;
+box-shadow:0px 0px 10px rgba(0,0,0,0.1);
+}
+
+img{
+width:100%;
+}
+
+button{
+background:black;
+color:white;
+border:none;
+padding:10px;
+cursor:pointer;
+}
+
+button:hover{
+background:#333;
+}
+
+</style>
+
+</head>
+<body>
+
+<h1>TIENDA PROYECTO</h1>
+
+<div class="grid">
+
+{% for producto in productos %}
+
+<div class="card">
+
+<img src="{{ url_for('static', filename=producto.imagen) }}">
+
+<h3>{{ producto.nombre }}</h3>
+
+<p>{{ producto.precio }}</p>
+
+<a href="https://wa.me/50432018351">
+
+<button>Comprar por WhatsApp</button>
+
+</a>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

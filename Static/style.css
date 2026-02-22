@@ -1,0 +1,54 @@
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:white;
+}
+
+header{
+    text-align:center;
+    padding:20px;
+    border-bottom:1px solid #ddd;
+}
+
+header h1{
+    font-size:28px;
+    letter-spacing:5px;
+}
+
+.productos{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:30px;
+    padding:40px;
+}
+
+.producto{
+    text-align:center;
+}
+
+.producto img{
+    width:100%;
+    height:300px;
+    object-fit:cover;
+}
+
+.producto h3{
+    margin:10px 0 5px;
+}
+
+.producto p{
+    margin:0 0 10px;
+    font-weight:bold;
+}
+
+button{
+    background:black;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#333;
+}
