@@ -16,7 +16,6 @@ PRODUCTOS_FILE = "productos.json"
 # carpeta donde se guardan las imágenes
 UPLOAD_FOLDER = os.path.join("static", "uploads")
 
-# decirle a flask donde subir archivos
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # crear carpeta si no existe
@@ -63,9 +62,7 @@ def admin():
             if archivo and archivo.filename != "":
 
                 nombre_archivo = secure_filename(archivo.filename)
-
                 ruta = os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo)
-
                 archivo.save(ruta)
 
                 productos = cargar_productos()
@@ -78,26 +75,26 @@ def admin():
 
                 guardar_productos(productos)
 
-            return redirect("/")
+            return redirect("/admin")
 
-    return render_template("admin.html")
+    # 👇 ESTA ES LA PARTE IMPORTANTE
+    productos = cargar_productos()
+    return render_template("admin.html", productos=productos)
+
 
 @app.route("/eliminar/<int:indice>", methods=["POST"])
 def eliminar(indice):
+
     productos = cargar_productos()
 
     if 0 <= indice < len(productos):
 
-        # obtener nombre del archivo
         nombre_archivo = productos[indice]["imagen"].split("/")[-1]
-
         ruta_imagen = os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo)
 
-        # borrar imagen si existe
         if os.path.exists(ruta_imagen):
             os.remove(ruta_imagen)
 
-        # eliminar producto del json
         productos.pop(indice)
         guardar_productos(productos)
 
