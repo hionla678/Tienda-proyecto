@@ -2,23 +2,26 @@ from flask import Flask, render_template, request, redirect
 import json
 import os
 from werkzeug.utils import secure_filename
-import cloudinary
-import cloudinary.uploader
 
 app = Flask(__name__)
 
-# 🔐 contraseña admin
+print("APP INICIANDO...")
+
+# contraseña admin
 PASSWORD = "1234"
 
-# 📁 archivo donde se guardan los productos
+# archivo donde se guardan los productos
 PRODUCTOS_FILE = "productos.json"
 
-# 🔹 CONFIGURACIÓN CLOUDINARY (PON TUS DATOS AQUÍ)
-cloudinary.config(
-    cloud_name="dj8adnlhn",
-    api_key="395448994121461",
-    api_secret="_1VV3uJ3WOZjv02ZBal2Py5Q2ho"
-)
+# carpeta donde se guardan las imágenes
+UPLOAD_FOLDER = os.path.join("static", "uploads")
+
+# decirle a flask donde subir archivos
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# crear carpeta si no existe
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 
 # cargar productos
 def cargar_productos():
@@ -31,44 +34,46 @@ def cargar_productos():
     except:
         return []
 
+
 # guardar productos
 def guardar_productos(productos):
     with open(PRODUCTOS_FILE, "w", encoding="utf-8") as f:
         json.dump(productos, f, indent=4, ensure_ascii=False)
+
 
 @app.route("/")
 def index():
     productos = cargar_productos()
     return render_template("index.html", productos=productos)
 
+
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
     if request.method == "POST":
 
-        password = request.form["password"]
+        password = request.form.get("password")
 
         if password == PASSWORD:
 
-            nombre = request.form["nombre"]
-            precio = request.form["precio"]
-
-            archivo = request.files["imagen"]
+            nombre = request.form.get("nombre")
+            precio = request.form.get("precio")
+            archivo = request.files.get("imagen")
 
             if archivo and archivo.filename != "":
+
                 nombre_archivo = secure_filename(archivo.filename)
 
-                # 🔥 SUBIR IMAGEN A CLOUDINARY
-                resultado = cloudinary.uploader.upload(archivo)
+                ruta = os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo)
 
-                url_imagen = resultado["secure_url"]
+                archivo.save(ruta)
 
                 productos = cargar_productos()
 
                 productos.append({
                     "nombre": nombre,
                     "precio": precio,
-                    "imagen": url_imagen
+                    "imagen": f"uploads/{nombre_archivo}"
                 })
 
                 guardar_productos(productos)
@@ -76,6 +81,28 @@ def admin():
             return redirect("/")
 
     return render_template("admin.html")
+
+@app.route("/eliminar/<int:indice>", methods=["POST"])
+def eliminar(indice):
+    productos = cargar_productos()
+
+    if 0 <= indice < len(productos):
+
+        # obtener nombre del archivo
+        nombre_archivo = productos[indice]["imagen"].split("/")[-1]
+
+        ruta_imagen = os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo)
+
+        # borrar imagen si existe
+        if os.path.exists(ruta_imagen):
+            os.remove(ruta_imagen)
+
+        # eliminar producto del json
+        productos.pop(indice)
+        guardar_productos(productos)
+
+    return redirect("/admin")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
