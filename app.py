@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect
 import json
 import os
-from werkzeug.utils import secure_filename
+import cloudinary
+import cloudinary.uploader
 
 app = Flask(__name__)
 
@@ -10,17 +11,15 @@ print("APP INICIANDO...")
 # contraseña admin
 PASSWORD = "1234"
 
-# archivo donde se guardan los productos
+# archivo productos
 PRODUCTOS_FILE = "productos.json"
 
-# carpeta donde se guardan las imágenes
-UPLOAD_FOLDER = os.path.join("static", "uploads")
-
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-# crear carpeta si no existe
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
+# CONFIG CLOUDINARY
+cloudinary.config(
+    cloud_name="dj8adnlhn",
+    api_key="395448994121461",
+    api_secret="_1VV3uJ3WOZjv02ZBal2Py5Q2ho"
+)
 
 # cargar productos
 def cargar_productos():
@@ -33,18 +32,15 @@ def cargar_productos():
     except:
         return []
 
-
 # guardar productos
 def guardar_productos(productos):
     with open(PRODUCTOS_FILE, "w", encoding="utf-8") as f:
         json.dump(productos, f, indent=4, ensure_ascii=False)
 
-
 @app.route("/")
 def index():
     productos = cargar_productos()
     return render_template("index.html", productos=productos)
-
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
@@ -59,28 +55,28 @@ def admin():
             precio = request.form.get("precio")
             archivo = request.files.get("imagen")
 
-            if archivo and archivo.filename != "":
+            if archivo:
 
-                nombre_archivo = secure_filename(archivo.filename)
-                ruta = os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo)
-                archivo.save(ruta)
+                subida = cloudinary.uploader.upload(archivo)
+
+                url_imagen = subida["secure_url"]
+                public_id = subida["public_id"]
 
                 productos = cargar_productos()
 
                 productos.append({
                     "nombre": nombre,
                     "precio": precio,
-                    "imagen": f"uploads/{nombre_archivo}"
+                    "imagen": url_imagen,
+                    "public_id": public_id
                 })
 
                 guardar_productos(productos)
 
             return redirect("/admin")
 
-    # 👇 ESTA ES LA PARTE IMPORTANTE
     productos = cargar_productos()
     return render_template("admin.html", productos=productos)
-
 
 @app.route("/eliminar/<int:indice>", methods=["POST"])
 def eliminar(indice):
@@ -89,17 +85,14 @@ def eliminar(indice):
 
     if 0 <= indice < len(productos):
 
-        nombre_archivo = productos[indice]["imagen"].split("/")[-1]
-        ruta_imagen = os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo)
+        public_id = productos[indice]["public_id"]
 
-        if os.path.exists(ruta_imagen):
-            os.remove(ruta_imagen)
+        cloudinary.uploader.destroy(public_id)
 
         productos.pop(indice)
         guardar_productos(productos)
 
     return redirect("/admin")
-
 
 if __name__ == "__main__":
     app.run(debug=True)
