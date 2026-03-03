@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Panel Admin</title>
+<title>Admin</title>
 </head>
+
 <body>
 
 <h2>Subir producto</h2>
@@ -11,7 +12,7 @@
 
 <input type="password" name="password" placeholder="Contraseña" required><br><br>
 
-<input type="text" name="nombre" placeholder="Nombre del producto" required><br><br>
+<input type="text" name="nombre" placeholder="Nombre producto" required><br><br>
 
 <input type="text" name="precio" placeholder="Precio" required><br><br>
 
@@ -20,6 +21,28 @@
 <button type="submit">Subir</button>
 
 </form>
+
+<hr>
+
+<h2>Productos</h2>
+
+{% for producto in productos %}
+
+<div style="border:1px solid black; padding:10px; margin-bottom:20px;">
+
+<h3>{{ producto.nombre }}</h3>
+
+<p>Precio: {{ producto.precio }}</p>
+
+<img src="{{ url_for('static', filename=producto.imagen) }}" width="150"><br><br>
+
+<form action="{{ url_for('eliminar', indice=loop.index0) }}" method="POST">
+<button type="submit">Eliminar</button>
+</form>
+
+</div>
+
+{% endfor %}
 
 </body>
 </html>
